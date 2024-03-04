@@ -1,0 +1,73 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: resources-app-service
+  labels:
+    app: resources-app
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30000
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: resources-app
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resources-app
+  namespace: k8s-program
+  labels:
+    app: resources-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: resources-app
+  template:
+    metadata:
+      labels:
+        app: resources-app
+    spec:
+      containers:
+        - name: resources-app
+          image: docker.io/epamvaleriynechayev/resources-app:1.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: RESOURCES_MS_PORT
+              value: "8080"
+            - name: RESOURCES_DB_URL
+              value: postgres-service
+            - name: RESOURCES_DB_PORT
+              value: "5432"
+
+
+---
+
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: song-service-deployment
+#  namespace: k8s-program
+#  labels:
+#    app: application
+#spec:
+#  replicas: 2
+#  selector:
+#    matchLabels:
+#      app: application
+#  template:
+#    metadata:
+#      labels:
+#        app: application
+#    spec:
+#      containers:
+#        - name: songs-service
+#          image: songs-service:1.0
+#          ports:
+#            - containerPort: 8081

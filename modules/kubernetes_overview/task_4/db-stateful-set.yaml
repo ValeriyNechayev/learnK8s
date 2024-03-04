@@ -1,0 +1,60 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: hostpath
+provisioner: rancher.io/local-path
+volumeBindingMode: WaitForFirstConsumer
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  selector:
+    app: db-pv
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: database-stateful-set
+spec:
+  selector:
+    matchLabels:
+      app: database
+  serviceName: "nginx"
+  replicas: 1
+#  minReadySeconds: 10 # by default is 0
+  template:
+    metadata:
+      labels:
+        app: database # has to match .spec.selector.matchLabels
+    spec:
+#      terminationGracePeriodSeconds: 10
+      containers:
+        - name: nginx
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: postgres-db-pv
+              mountPath: /data
+          env:
+            - name: POSTGRES_DB
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "postgres"
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-db-pv
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: hostpath
+        resources:
+          requests:
+            storage: 1Gi

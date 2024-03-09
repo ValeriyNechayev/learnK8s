@@ -12,7 +12,7 @@ metadata:
   name: postgres-service
 spec:
   selector:
-    app: db-pv
+    app: database
   ports:
     - protocol: TCP
       port: 5432
@@ -27,17 +27,15 @@ spec:
   selector:
     matchLabels:
       app: database
-  serviceName: "nginx"
+  serviceName: postgres-service
   replicas: 1
-#  minReadySeconds: 10 # by default is 0
   template:
     metadata:
       labels:
-        app: database # has to match .spec.selector.matchLabels
+        app: database
     spec:
-#      terminationGracePeriodSeconds: 10
       containers:
-        - name: nginx
+        - name: postgres-db
           image: postgres:latest
           ports:
             - containerPort: 5432

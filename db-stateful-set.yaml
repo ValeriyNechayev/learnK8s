@@ -42,11 +42,48 @@ spec:
           volumeMounts:
             - name: postgres-db-pv
               mountPath: /data
+            - name: init-sql-script
+              mountPath: /init-script
           env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: DB_USER
             - name: POSTGRES_DB
               value: "postgres"
             - name: POSTGRES_PASSWORD
-              value: "postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: DB_PASSWORD
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/bash","-c",  "sleep 30 && psql -U $POSTGRES_USER -d postgres -f ./init-script/init-script.sql"]
+#probes
+          readinessProbe:
+            exec:
+              command: [ "/bin/bash","-c","psql -U $POSTGRES_USER -d postgres -c select 1" ]
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+
+          livenessProbe:
+            exec:
+              command: [ "/bin/bash","-c","psql -U $POSTGRES_USER -d postgres -c select 1" ]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+# volumes
+      volumes:
+        - name: init-sql-script
+          configMap:
+            name: script-configmap
   volumeClaimTemplates:
     - metadata:
         name: postgres-db-pv

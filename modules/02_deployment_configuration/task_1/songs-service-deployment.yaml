@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: songs-app-service
+  labels:
+    app: songs-app
+spec:
+  ports:
+    - port: 8081
+      targetPort: 8081
+      nodePort: 30001
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: songs-app
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: songs-app
+  namespace: k8s-program
+  labels:
+    app: songs-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: songs-app
+  template:
+    metadata:
+      labels:
+        app: songs-app
+    spec:
+      containers:
+        - name: songs-app
+          image: docker.io/epamvaleriynechayev/songs-app:2.0
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SONGS_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: SONGS_DB_USER
+                  name: apps-secrets
+            - name: SONGS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: SONGS_DB_PASSWORD
+          envFrom:
+            - configMapRef:
+                name: songs-app-configmap
+

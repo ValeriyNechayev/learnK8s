@@ -1,0 +1,56 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: resources-app-service
+  labels:
+    app: resources-app
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30000
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: resources-app
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resources-app
+  namespace: k8s-program
+  labels:
+    app: resources-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: resources-app
+  template:
+    metadata:
+      labels:
+        app: resources-app
+    spec:
+      containers:
+        - name: resources-app
+          image: docker.io/epamvaleriynechayev/resources-app:2.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: RESOURCES_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: RESOURCES_DB_USER
+            - name: RESOURCES_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: RESOURCES_DB_PASSWORD
+          envFrom:
+            - configMapRef:
+                name: resources-app-configmap
+
+

@@ -1,0 +1,23 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: resources-app-configmap
+  labels:
+    app: resources-app
+data:
+  RESOURCES_MS_PORT: "8080"
+  RESOURCES_DB_URL: "postgres-service"
+  RESOURCES_DB_PORT: "5432"
+
+---
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: songs-app-configmap
+  labels:
+    app: songs-app
+data:
+  SONGS_MS_PORT: "8081"
+  SONGS_DB_URL: "postgres-service"
+  SONGS_DB_PORT: "5432"

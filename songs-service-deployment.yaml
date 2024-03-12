@@ -37,7 +37,7 @@ spec:
           image: docker.io/epamvaleriynechayev/songs-app:2.0
           ports:
             - containerPort: 8081
-# probes
+          # probes
           startupProbe:
             httpGet:
               port: 8081
@@ -62,7 +62,7 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 2
 
-# variables
+          # variables
           env:
             - name: SONGS_DB_USER
               valueFrom:

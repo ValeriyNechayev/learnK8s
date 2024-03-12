@@ -35,13 +35,48 @@ spec:
     spec:
       containers:
         - name: resources-app
-          image: docker.io/epamvaleriynechayev/resources-app:1.0
+          image: docker.io/epamvaleriynechayev/resources-app:2.0
           ports:
             - containerPort: 8080
+# probes
+          startupProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/liveness
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/readiness
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/liveness
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+
+# variables
           env:
-            - name: RESOURCES_MS_PORT
-              value: "8080"
-            - name: RESOURCES_DB_URL
-              value: postgres-service
-            - name: RESOURCES_DB_PORT
-              value: "5432"
+            - name: RESOURCES_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: DB_USER
+            - name: RESOURCES_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: DB_PASSWORD
+          envFrom:
+            - configMapRef:
+                name: resources-app-configmap
+
+

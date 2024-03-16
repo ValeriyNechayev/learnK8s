@@ -27,6 +27,11 @@ spec:
   selector:
     matchLabels:
       app: songs-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
   template:
     metadata:
       labels:
@@ -34,7 +39,7 @@ spec:
     spec:
       containers:
         - name: songs-app
-          image: docker.io/epamvaleriynechayev/songs-app:2.0
+          image: docker.io/epamvaleriynechayev/songs-app:3.0
           ports:
             - containerPort: 8081
           # probes

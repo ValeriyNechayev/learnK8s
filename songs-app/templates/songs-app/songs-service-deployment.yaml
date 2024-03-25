@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: songs-app-service
+  namespace: {{.Values.namespace}}
+  labels:
+    app: songs-app
+spec:
+  ports:
+    - port: 8081
+      targetPort: 8081
+      nodePort: 30001
+      protocol: TCP
+  type: NodePort
+  selector:
+    app: songs-app
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: songs-app
+  namespace: {{.Values.namespace}}
+  labels:
+    app: songs-app
+spec:
+  replicas: {{.Values.replicas.app}}
+  selector:
+    matchLabels:
+      app: songs-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: songs-app
+    spec:
+      containers:
+        - name: songs-app
+          image: docker.io/epamvaleriynechayev/songs-app:3.0
+          ports:
+            - containerPort: 8081
+          # probes
+          startupProbe:
+            httpGet:
+              port: 8081
+              path: /actuator/health/liveness
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+
+          readinessProbe:
+            httpGet:
+              port: 8081
+              path: /actuator/health/readiness
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+
+          livenessProbe:
+            httpGet:
+              port: 8081
+              path: /actuator/health/liveness
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+
+          # variables
+          env:
+            - name: SONGS_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: DB_USER
+            - name: SONGS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: DB_PASSWORD
+          envFrom:
+            - configMapRef:
+                name: songs-app-configmap
+

@@ -1,0 +1,7 @@
+replicas:
+  app: 2
+  db: 1
+namespace: k8s-program
+
+nameOverride: ""
+fullnameOverride: ""

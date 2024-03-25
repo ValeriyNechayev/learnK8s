@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: script-configmap
+data:
+  init-script.sql: |
+    CREATE TABLE IF NOT EXISTS songs (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128),
+    artist VARCHAR(128),
+    album VARCHAR(128),
+    length VARCHAR(128),
+    resourceId INT UNIQUE NOT NULL,
+    year VARCHAR(10)
+    );

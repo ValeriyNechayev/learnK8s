@@ -9,9 +9,8 @@ spec:
   ports:
     - port: 8080
       targetPort: 8080
-      nodePort: 30000
       protocol: TCP
-  type: NodePort
+  type: ClusterIP
   selector:
     app: resources-app
 ---

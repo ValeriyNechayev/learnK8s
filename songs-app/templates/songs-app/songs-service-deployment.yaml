@@ -9,9 +9,8 @@ spec:
   ports:
     - port: 8081
       targetPort: 8081
-      nodePort: 30001
       protocol: TCP
-  type: NodePort
+  type: ClusterIP
   selector:
     app: songs-app
 ---
